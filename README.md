@@ -52,7 +52,7 @@ atribut, je v základní verzi v pořádku, že program spadne.
 Kvalita kódu nyní zahrnuje i komentáře v kódu, více o jednotlivých kategoriích v
 minulém zadání.
 
-## Bonusové body
+## Bonusové body (které by měl splňovat tento program)
 
 ### Používání Gitu pro vývoj s vhodnými popisy commitů (1 b)
 Pokud budete pro verzování používat Git, vytvořte si účet na GitHubu nebo jiné
@@ -71,5 +71,35 @@ Kromě průměrné vzdálenosti ke kontejneru vypište i [medián](https://cs.wi
 Program vytvoří soubor `adresy_kontejnery.geojson` ve formátu GeoJSON, který
 bude obsahovat všechny adresní body ze vstupních dat a v atributech každého
 adresního bodu bude v klíči `kontejner` uloženo `ID` nejbližšího kontejneru k
-danému adresnímu bodu.  
+danému adresnímu bodu.
 
+
+## Popis programu
+
+### Vytvoření funkcí
+#### Načítání souboru
+Pro načtění souboru je napsána funkce, která při načítání souboru ošetřuje zda soubor existuje, zda k němu má program přístup a zda je validní `FileNotFoundError`,`PermissionError`, `ValueError`.
+
+#### Zjištění informací o kontejnerech
+V této funkci přiřadí program do proměnných `ulice` `souradnice` `pristup` hodnoty z kontejnery.geojson. V podmínce zajistímě počítání pouze s veřejnými kontejnery, díky proměnné `pristup`. Pokud přístup není volný, tak přiřadí souřadnicím `None`
+
+#### Zjištění informací o adresách domů
+Přiřadí ulice a čísla domů do proměnné a také souřadnice daných míst z souboru adresy.geojson. A převede souřadnice pomocí `Transform` z WGS84 do souřadnicového systému JTSK.
+
+#### Rozděluje čtení kontejnerů a adres
+Dělí čtení kontejnerů a adres, ukládá je do datové struktury s klíčem reprezentujícím 
+ulici a hodnotu reprezentující souřadnice. V této funkci je for cyklus, které projede jednotlivé adresy ptá se v podmínce zda je to kontejner či adresa domu. Také je tam dané výjimka v try bloku `KeyError`.
+.
+#### Výpočet vzdálenosti
+Tato funkce pomocí pythagorovy věty vypočte vzdálenost bodů.
+
+#### Hledá minimální vzdálenost ke kontejneru
+Toto je vytvořeno jedním for cyklem, který projíždí adresy 
+`for (adresa_ulice, adresa_souradnice) in adresy.items()` v tom je vnořený další for cyklus s kontejnery
+`for kontejnery_ulice, kontejnery_souradnice in kontejnery.items()`, ve kterém jsou podmínky na ošetření kontejnerů bez souřadnic viz funkce Zjištění informací o kontejnerech a pokud mají stejnou ulici jako adresa, tak není minimální vzdálensot žádná. Následně vyvolá funkci na výpočet vzdálenosti a přiřadí vzdálenost do proměnné. Následuje podmínka přiřazení minimální vzdálenosti. V prvním cyklu adresy tzv. na stejné úrovni jako cyklus kontejnery následuje podmínka pro zajištění aby vzdálenost nesměla být větší než 10 km. A poté přiřazení do proměnné `vzdalenosti[adresa_ulice] = min_vzd`.
+
+#### Medián (Bonus)
+Vezme všechny hodnoty vzdáleností přiřadí je do seznamu, seřadí hodnoty a následně vypočítá medián vzdáleností
+
+### Začátek programu
+Do proměnných si přiřadíme soubory pomocí funkce `nacteni_souboru` soubory s adresami a kontejnery. Následně si pomocí funkce `nacteni_dat` načteme data z vytvořených proměných v předchozím kroku a přiřadímě do nových proměnných. V dalším kroku spočítám vzdálenosti `vzdalenosti = hledani_min_vzdalenosti(nacteni_kontejnery, nacteni_adresy)`, kde do funkce `hledani_min_vzdalenosti` použijeme předchozí proměnné, které jsme získaly z funkce načtení dat. Poté spočítáme průměr vzdáleností a medián. Následně pomocí funkce max zjistímě maximální vzdálenost ke kontejneru. Následně je proveden for cyklus pro zjištění adresy k maximální vzdálenosti, tím že porovnáme ve vzdálenost zda se vzdálenost rovná maximu. Poté následuje tisk výsledků.
