@@ -1,4 +1,4 @@
-import json, os
+import json, os, argparse
 from pyproj import CRS, Transformer
 from math import sqrt
 from sys import exit
@@ -9,8 +9,19 @@ CESTA_ADRESY = "adresy.geojson"
 
 wgs2jtsk = Transformer.from_crs(CRS.from_epsg(4326), CRS.from_epsg(5514))
 
+
+# Bonus, ktery nacte soubor jako parametr za pomoci modulu Argparse.
+parser = argparse.ArgumentParser()
+parser.add_argument('-a', '--adresni_body', required=False, default=None)
+parser.add_argument('-k', '--kontejnery', required=False, default=None)
+args = parser.parse_args()
+if args.adresni_body != None:
+    path_adresy = args.adresni_body
+if args.kontejnery != None:
+    path_kontejnery = args.kontejnery
+
 def nacteni_souboru(nazev):
-    #Načtení souboru a oveření, zda soubor existuje a program má k němu přístup.
+    """Načtení souboru a oveření, zda soubor existuje a program má k němu přístup."""
     try:
         with open(nazev, "r", encoding="UTF-8") as soubor:
             return json.load(soubor)["features"]
@@ -25,18 +36,19 @@ def nacteni_souboru(nazev):
         exit()
         
 def cteni_kontejneru(misto):
-    # Přiřadí do proměnných potřebné informace z kontejnery.geojson. 
-    # V podmínce zajistímě počítání pouze s veřejnými kontejnery
+    """Přiřadí do proměnných potřebné informace z kontejnery.geojson. 
+    V podmínce zajistímě počítání pouze s veřejnými kontejnery"""
     ulice = misto["properties"]["STATIONNAME"]
     souradnice = misto["geometry"]["coordinates"]
     pristup = misto["properties"]["PRISTUP"]
 
     if pristup=="volně":
         return ulice, souradnice
-    return ulice, None
+    elif pristup=="obyvatelům domu":
+        return ulice, None
 
 def cteni_adresy(misto):
-    # Přiřadí ulice a čísla domů do proměnné a také souřadnice daných míst.
+    """Přiřadí ulice a čísla domů do proměnné a také souřadnice daných míst."""
     ulice = misto["properties"]["addr:street"] + " " + misto["properties"]["addr:housenumber"]
     souradnice_sirka = misto["geometry"]["coordinates"][1]
     souradnice_delka = misto["geometry"]["coordinates"][0]
@@ -44,8 +56,8 @@ def cteni_adresy(misto):
     return ulice, wgs2jtsk.transform(souradnice_sirka, souradnice_delka)
 
 def nacteni_dat(data, kontejner=True):
-    # Dělí čtení kontejnerů a adres, ukládá je do datové struktury s klíčem reprezentujícím 
-    # ulici a hodnotu reprezentující souřadnice
+    """Načte a umí zpracovávat jak kontejnery a adresy, podle hodnoty parametru kontejner, ukládá je do datové struktury s klíčem reprezentujícím 
+    ulici a hodnotu reprezentující souřadnice"""
     nacteni = {}
     for misto in data:
         try:
@@ -56,6 +68,7 @@ def nacteni_dat(data, kontejner=True):
             
             nacteni[ulice] = souradnice
         except KeyError:
+            print("Klíč který hledáte nebyl nalezen")
             pass
 
     nazev = "kontejneru"
@@ -69,17 +82,16 @@ def nacteni_dat(data, kontejner=True):
     return (nacteni)
     
 def pythagoras(s1, s2):
-    # Vypocet vzdalenosti bodu pomoci Pythagorovy vety.
+    """Vypocet vzdalenosti bodu pomoci Pythagorovy vety."""
     return sqrt((s1[0] - s2[0])**2 + (s1[1] - s2[1])**2)
 
 def hledani_min_vzdalenosti(kontejnery, adresy):
-    # Hleda minimalni vzdalenost od kontejneru.
+    """ Hleda minimalni vzdalenost od kontejneru."""
     vzdalenosti = {}
-
+    
     for (adresa_ulice, adresa_souradnice) in adresy.items():
 
-        min_vzd = -1
-        prvni = True
+        min_vzd = float('inf')
 
         for kontejnery_ulice, kontejnery_souradnice in kontejnery.items():
             if kontejnery_souradnice==None and kontejnery_ulice==adresa_ulice:
@@ -89,9 +101,8 @@ def hledani_min_vzdalenosti(kontejnery, adresy):
                 continue
             
             vzdalenost = pythagoras(adresa_souradnice, kontejnery_souradnice)
-            if prvni or vzdalenost < min_vzd:
+            if vzdalenost < min_vzd:
                 min_vzd = vzdalenost
-                prvni = False
 
         if min_vzd > 10000: # Ošetření, že vzdálenost musí být menší než 10 km
             print("Kontejner je dál než 10 km.")
@@ -114,7 +125,6 @@ def median(vzdalenosti):
 
     return (sez_vzdalenosti[p] + sez_vzdalenosti[p + 1]) / 2
 
-os.path.dirname(os.path.abspath(__file__))
 
 data_kontejnery = nacteni_souboru(CESTA_KONTEJNERY)
 data_adresy = nacteni_souboru(CESTA_ADRESY)
