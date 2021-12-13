@@ -4,21 +4,21 @@ from math import sqrt
 from sys import exit
 
 # Určím cestu relativní cestu ke konterjnerům a adresám
-CESTA_KONTEJNERY = "kontejnery.geojson"
-CESTA_ADRESY = "adresy.geojson"
+cesta_kontejnery = "kontejnery.geojson"
+cesta_adresy = "adresy.geojson"
 
 wgs2jtsk = Transformer.from_crs(CRS.from_epsg(4326), CRS.from_epsg(5514))
 
 
 # Bonus, ktery nacte soubor jako parametr za pomoci modulu Argparse.
 parser = argparse.ArgumentParser()
-parser.add_argument('-a', '--adresni_body', required=False, default=None)
-parser.add_argument('-k', '--kontejnery', required=False, default=None)
+parser.add_argument('-a', '--adresy', type = str, required=False, default=None)
+parser.add_argument('-k', '--kontejnery', type = str, required=False, default=None)
 args = parser.parse_args()
-if args.adresni_body != None:
-    path_adresy = args.adresni_body
-if args.kontejnery != None:
-    path_kontejnery = args.kontejnery
+if args.adresy != None:
+    cesta_adresy = args.adresy
+elif args.kontejnery != None:
+    cesta_kontejnery = args.kontejnery
 
 def nacteni_souboru(nazev):
     """Načtení souboru a oveření, zda soubor existuje a program má k němu přístup."""
@@ -126,8 +126,8 @@ def median(vzdalenosti):
     return (sez_vzdalenosti[p] + sez_vzdalenosti[p + 1]) / 2
 
 
-data_kontejnery = nacteni_souboru(CESTA_KONTEJNERY)
-data_adresy = nacteni_souboru(CESTA_ADRESY)
+data_kontejnery = nacteni_souboru(cesta_kontejnery)
+data_adresy = nacteni_souboru(cesta_adresy)
 
 nacteni_kontejnery = nacteni_dat(data_kontejnery)
 
@@ -151,7 +151,7 @@ print()
 print(f"Načteno adresních bodů: {len(nacteni_adresy)}")
 print(f"Načteno kontejnerů na tříděný odpad: {len(nacteni_kontejnery)}")
 print()
-print(f"Průměrná vzdálenost adresního bodu ke kontejneru: "f"{prumer:.0f}"" metru")
+print(f"Průměrná vzdálenost adresního bodu ke kontejneru: "f"{prumer:.0f}"" metrů")
 print(f"Median vzdálenosti ke kontejneru: {median:.0f} metru")
 print()
-print(f"Nejdále ke kontejneru je z adresního bodu '{nejvzdalenejsi}', konkretne {maximum:.0f} metru")
+print(f"Nejdále ke kontejneru je z adresního bodu '{nejvzdalenejsi}', konkrétně {maximum:.0f} metrů")
