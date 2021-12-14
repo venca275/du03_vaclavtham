@@ -1,4 +1,4 @@
-import json, os, argparse
+import json,argparse
 from pyproj import CRS, Transformer
 from math import sqrt
 from sys import exit
