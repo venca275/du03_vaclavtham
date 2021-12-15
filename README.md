@@ -1,5 +1,51 @@
 # du03_vaclavtham
 
+## Uživatelská dokumentace
+Při spuštění programu a předání parametrů -a či -k s názvy souboru má možnost uživatel určit vlastní GEOJSON soubory. Pokud uživatel nepředá název souboru, program využije předem definované názvy. Program očekává, že soubor s adresami bude v souřadnicovém systému WGS84 a kontejnery v JTSK. Příklad vsutpu adres
+```
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "node/296443235",
+          "addr:conscriptionnumber": "333",
+          "addr:housenumber": "333/25",
+          "addr:postcode": "14800",
+          "addr:street": "Volarská",
+          "addr:streetnumber": "25",
+          "source:addr": "uir_adr",
+          "uir_adr:ADRESA_KOD": "21878757"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            14.4851432,
+            50.0101681
+          ]
+        },
+        "id": "node/296443235"
+      },
+```
+Příklad vstupu kontejnerů
+```
+	{
+			"type" : "Feature",
+			"geometry" : {
+				"type" : "Point",
+				"coordinates" : [ -741687.4500369802, -1044981.8600061499 ]
+			},
+			"properties" : {
+				"OBJECTID" : 1,
+				"ID" : 5597,
+				"STATIONNUMBER" : "0002/-477",
+				"STATIONNAME" : "Máchova 1137/8",
+				"CITYDISTRICTRUIANCODE" : 500089,
+				"CITYDISTRICT" : "Praha 2",
+				"PRISTUP" : "obyvatelům domu"
+			}
+		},
+```
+Program spočítá kolik bylo načteno adresních bodů, kolik bylo načteno kontejnerů. Poté také průměrnou vzdálenost adresního bodu ke kontejneru. Medián vzdálenosti k nejbližšímu kontejneru. A také jaké adresa to má k nejbližšímu kontejneru nejdále. A tyto údaje vypíše do terminálu.
+
 ## Popis programu
 
 ### Vytvoření funkcí
