@@ -48,7 +48,7 @@ def cteni_kontejneru(misto):
         return ulice, None
 
 def cteni_adresy(misto):
-    """Přiřadí ulice a čísla domů do proměnné a také souřadnice daných míst."""
+    """Vratí ulice, čísla domů a také souřadnice daných míst."""
     ulice = misto["properties"]["addr:street"] + " " + misto["properties"]["addr:housenumber"]
     souradnice_sirka = misto["geometry"]["coordinates"][1]
     souradnice_delka = misto["geometry"]["coordinates"][0]
@@ -139,10 +139,10 @@ prumer = sum(vzdalenosti.values()) / len(vzdalenosti)
 
 median = median(vzdalenosti)
 
-maximum = max(vzdalenosti.values())
+MAXIMUM = max(vzdalenosti.values())
 
 for (adresa, vzdalenost) in vzdalenosti.items():
-    if vzdalenost == maximum:
+    if vzdalenost == MAXIMUM:
         nejvzdalenejsi = adresa
 
 # Výpis výsledků
@@ -154,4 +154,4 @@ print()
 print(f"Průměrná vzdálenost adresního bodu ke kontejneru: "f"{prumer:.0f}"" metrů")
 print(f"Median vzdálenosti ke kontejneru: {median:.0f} metru")
 print()
-print(f"Nejdále ke kontejneru je z adresního bodu '{nejvzdalenejsi}', konkrétně {maximum:.0f} metrů")
+print(f"Nejdále ke kontejneru je z adresního bodu '{nejvzdalenejsi}', konkrétně {MAXIMUM:.0f} metrů")
